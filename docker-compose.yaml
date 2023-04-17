@@ -1,0 +1,13 @@
+version: "3"
+
+services:
+  app:
+    build:
+      context: .
+      args:
+        - NODE_ENV=production
+    environment:
+      - BOT_TOKEN=your_bot_token
+      - OPENAI_API_KEY=your_openai_api_key
+      - MONGO_URI=uri
+    restart: always
