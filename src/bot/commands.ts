@@ -41,6 +41,24 @@ bot.command("threads", async (ctx) => {
   });
 });
 
+bot.command("model", async (ctx) => {
+  const currentModel = await aiService.getModel();
+  const models = ["gpt-4", "gpt-3.5-turbo", "gpt-3.5-legacy"];
+  const buttons = models.map((model) => {
+    return {
+      text: model,
+      callback_data: model,
+    };
+  }
+  );
+  ctx.reply(`Current model: ${currentModel}`);
+  ctx.reply("Select a model", {
+    reply_markup: {
+      inline_keyboard: [buttons],
+    },
+  });
+});
+
 // handle /balance command
 bot.command("balance", async (ctx) => {
   const balance = await aiService.getBalance();
@@ -74,9 +92,14 @@ bot.on("callback_query", async (ctx) => {
     return;
   }
   const cbQuery: query = ctx.callbackQuery as query;
-  const threadId = cbQuery.data as string;
-  await aiService.changeThread(threadId);
-  ctx.answerCbQuery("✅ - Thread changed");
+  if (cbQuery.data.includes("gpt")) {
+    await aiService.changeModel(cbQuery.data);
+    ctx.answerCbQuery("✅ - Model changed");
+  } else {
+    const threadId = cbQuery.data as string;
+    await aiService.changeThread(threadId);
+    ctx.answerCbQuery("✅ - Thread changed");
+  }
 });
 
 export default bot;

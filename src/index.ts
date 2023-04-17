@@ -3,6 +3,7 @@ import { Logger } from 'node-colorful-logger';
 import AIService from "./openai/openAI.service";
 import { botEnv } from "./env/config";
 import Voice from "./bot/voice";
+import reply from "./bot/reply";
 
 const logger = new Logger();
 logger.enableDebugMode();
@@ -32,8 +33,8 @@ bot.on("message", async (ctx) => {
       ctx.replyWithPhoto({ url: image });
       return;
     }
-    const reply = await aiService.reply(message);
-    ctx.replyWithMarkdownV2(reply);
+    const aiReply = await aiService.reply(message);
+    reply(ctx, aiReply);
   } else {
     if ("voice" in ctx.message) {
       const file_id = ctx.message.voice.file_id;
@@ -42,8 +43,8 @@ bot.on("message", async (ctx) => {
       const file_url = `https://api.telegram.org/file/bot${botEnv.BOT_TOKEN}/${file_path}`;
       const voice = new Voice();
       voice.handle(file_url).then(async (message) => {
-        const reply = await aiService.reply(message as string);
-        ctx.replyWithMarkdownV2(reply);
+        const aiReply = await aiService.reply(message as string);
+        reply(ctx, aiReply);
       }).catch((err) => {
         console.log(err);
       });

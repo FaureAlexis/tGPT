@@ -7,6 +7,7 @@ import ThreadRepository from '../database/repository/thread';
 import { Thread } from '../database/schemas/thread';
 import mongoose from 'mongoose';
 import { code } from '../prompt/prompts';
+import { AxiosError } from 'axios';
 
 class AIService {
   private openai: OpenAIApi;
@@ -35,7 +36,7 @@ class AIService {
       this.Thread.messages.push({
         role: 'user',
         content: code,
-      });
+      } as ChatCompletionRequestMessage);
     }
   }
 
@@ -61,7 +62,11 @@ class AIService {
       return 'Une erreur est survenue';
     }
     this.Thread.messages.push(userMessage);
-    console.log(this.Thread);
+    while (this.Thread.usage.prompt_tokens + this.Thread.usage.completion_tokens + 1000 > 4097) {
+      this.Thread.messages.shift();
+      this.Thread.usage.prompt_tokens -= this.Thread.messages[0].content.split(' ').length;
+      this.Thread.usage.completion_tokens -= this.Thread.messages[0].content.split(' ').length;
+    }
     const payload: CreateChatCompletionRequest = {
       model: this.Thread.model,
       messages: this.Thread.messages,
@@ -94,8 +99,11 @@ class AIService {
         this.Thread._id = thread._id as unknown as mongoose.Schema.Types.ObjectId;
       } 
       return escapeString(botResponse.content);
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      if (error instanceof AxiosError) {
+        console.error(error.toJSON());
+      }
+      console.log(error.response?.data?.error);
       return 'Une erreur est survenue';
     }
   }
@@ -171,6 +179,19 @@ class AIService {
       return 'Une erreur est survenue';
     }
     return (this.Thread._id.toString());
+  }
+  async getModel() {
+    if (!this.Thread) {
+      return 'Une erreur est survenue';
+    }
+    return this.Thread.model;
+  }
+  async changeModel(model: string) {
+    if (!this.Thread) {
+      return 'Une erreur est survenue';
+    }
+    this.Thread.model = model;
+    return model;
   }
 }
 
