@@ -17,7 +17,7 @@ class Voice {
     return stream;
   }
   async convert(stream: Readable) {
-    const outStream = fs.createWriteStream('tmp/out.mp3');
+    const outStream = fs.createWriteStream('./tmp/out.mp3');
     const audio = ffmpeg(stream)
       .audioCodec('libmp3lame')
       .format('mp3')

@@ -14,9 +14,9 @@ interface query {
 bot.start((ctx) => ctx.reply("Bienvenue sur le bot OpenAI"));
 
 bot.help((ctx) => ctx.reply("Commands:\n \
-⚪ /retry – Regenerate last bot answer\n\
 ⚪ /new – Start new dialog\n\
-⚪ /mode – Select chat mode\n\
+⚪ /model – Select chat mode\n\
+⚪ /threads – Select thread\n\
 ⚪ /settings – Show settings\n\
 ⚪ /balance – Show balance\n\
 ⚪ /help – Show help"));
